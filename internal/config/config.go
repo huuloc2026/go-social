@@ -19,7 +19,7 @@ type Config struct {
 	PostgresDB DBConfig `mapstructure:"database"`
 }
 
-func LoadConfig() Config {
+func LoadConfig() *Config {
 	// Initialize Viper
 	viper.SetConfigName("config") // Name of config file (without extension)
 	viper.SetConfigType("yaml")   // Config file type
@@ -38,5 +38,5 @@ func LoadConfig() Config {
 	if err := viper.Unmarshal(&cfg); err != nil {
 		log.Fatalf("Unable to decode config: %v", err)
 	}
-	return cfg
+	return &cfg
 }
