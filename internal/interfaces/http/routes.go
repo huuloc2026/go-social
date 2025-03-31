@@ -4,7 +4,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/huuloc2026/go-social/internal/config"
-	"github.com/huuloc2026/go-social/internal/interfaces/adapters/http/handlers"
+	"github.com/huuloc2026/go-social/internal/interfaces/http/handlers"
 	"github.com/huuloc2026/go-social/internal/usecases"
 )
 

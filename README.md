@@ -18,6 +18,21 @@ go-social/
 │── go.sum
 │── README.md
 
+# Register a new user
+curl -X POST -H "Content-Type: application/json" -d '{
+  "username": "testuser",
+  "email": "test@example.com",
+  "password": "password123"
+}' http://localhost:8888/api/auth/register
+
+# Login
+curl -X POST -H "Content-Type: application/json" -d '{
+  "email": "test@example.com",
+  "password": "password123"
+}' http://localhost:8888/api/auth/login
+
+# Get current user (use the token from login)
+curl -X GET -H "Authorization: Bearer <YOUR_TOKEN>" http://localhost:8000/api/me
 
 API Endpoints Design
 Authentication
