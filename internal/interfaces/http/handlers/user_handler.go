@@ -1,106 +1,99 @@
 package handlers
 
 import (
-	"net/http"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/huuloc2026/go-social/internal/domain"
+	"github.com/huuloc2026/go-social/internal/domain/models"
 	"github.com/huuloc2026/go-social/internal/usecases"
-	"github.com/huuloc2026/go-social/pkg/utils"
 )
 
 type UserHandler struct {
-	userUsecase usecases.UserUsecase
+	UserUsecase *usecases.UserUsecase
 }
 
-func NewUserHandler(userUsecase usecases.UserUsecase) *UserHandler {
-	return &UserHandler{userUsecase: userUsecase}
+func NewUserHandler(userUsecase *usecases.UserUsecase) *UserHandler {
+	return &UserHandler{UserUsecase: userUsecase}
 }
 
-type RegisterRequest struct {
-	Username string `json:"username" validate:"required,min=3,max=50"`
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
-}
-
+// Đăng ký
 func (h *UserHandler) Register(c *fiber.Ctx) error {
-	var req RegisterRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
-		})
+	user := new(models.User)
+	if err := c.BodyParser(user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
 	}
 
-	// Validate request
-	if err := utils.ValidateStruct(req); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
+	if err := h.UserUsecase.Register(user); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	passwordHash, err := utils.HashPassword(req.Password)
-	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to process password",
-		})
-	}
-
-	user := &domain.User{
-		Username:     req.Username,
-		Email:        req.Email,
-		PasswordHash: passwordHash,
-	}
-
-	if err := h.userUsecase.Register(user); err != nil {
-		return c.Status(http.StatusConflict).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	return c.Status(http.StatusCreated).JSON(user)
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"message": "User created successfully"})
 }
 
-type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
-}
-
+// Đăng nhập
 func (h *UserHandler) Login(c *fiber.Ctx) error {
-	var req LoginRequest
+	var req struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
 	if err := c.BodyParser(&req); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
 	}
 
-	// Validate request
-	if err := utils.ValidateStruct(req); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	token, err := h.userUsecase.Login(req.Email, req.Password)
+	token, err := h.UserUsecase.Login(req.Email, req.Password)
 	if err != nil {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Invalid credentials",
-		})
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": err.Error()})
 	}
 
-	return c.JSON(fiber.Map{
-		"token": token,
-	})
+	return c.JSON(fiber.Map{"token": token})
 }
 
-func (h *UserHandler) GetCurrentUser(c *fiber.Ctx) error {
-	userID := c.Locals("userID").(uint)
-
-	user, err := h.userUsecase.GetUserByID(userID)
+// Lấy thông tin user
+func (h *UserHandler) GetUserByID(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
 	if err != nil {
-		return c.Status(http.StatusNotFound).JSON(fiber.Map{
-			"error": "User not found",
-		})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+	}
+
+	user, err := h.UserUsecase.GetUserByID(uint(id))
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "User not found"})
 	}
 
 	return c.JSON(user)
+}
+
+// Cập nhật user
+func (h *UserHandler) UpdateUser(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+	}
+
+	var user models.User
+	if err := c.BodyParser(&user); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid input"})
+	}
+
+	user.ID = uint(id)
+	if err := h.UserUsecase.UpdateUser(&user); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(fiber.Map{"message": "User updated successfully"})
+}
+
+// Xóa user
+func (h *UserHandler) DeleteUser(c *fiber.Ctx) error {
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid user ID"})
+	}
+
+	if err := h.UserUsecase.DeleteUser(uint(id)); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+
+	return c.JSON(fiber.Map{"message": "User deleted successfully"})
 }

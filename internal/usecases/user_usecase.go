@@ -2,68 +2,60 @@ package usecases
 
 import (
 	"errors"
-	"time"
 
-	"github.com/huuloc2026/go-social/internal/config"
-	"github.com/huuloc2026/go-social/internal/domain"
+	"github.com/huuloc2026/go-social/internal/domain/models"
+	"github.com/huuloc2026/go-social/internal/domain/repositories"
 	"github.com/huuloc2026/go-social/pkg/utils"
-
-	"github.com/golang-jwt/jwt/v4"
 )
 
-type UserUsecase interface {
-	Register(user *domain.User) error
-	Login(email, password string) (string, error)
-	GetUserByID(id uint) (*domain.User, error)
+type UserUsecase struct {
+	UserRepo *repositories.UserRepository
 }
 
-type userUsecase struct {
-	userRepo domain.UserRepository
-	config   *config.Config
+func NewUserUsecase(userRepo *repositories.UserRepository) *UserUsecase {
+	return &UserUsecase{UserRepo: userRepo}
 }
 
-func NewUserUsecase(userRepo domain.UserRepository, cfg *config.Config) UserUsecase {
-	return &userUsecase{
-		userRepo: userRepo,
-		config:   cfg,
-	}
-}
-
-func (uc *userUsecase) Register(user *domain.User) error {
-	// Check if email already exists
-	_, err := uc.userRepo.FindByEmail(user.Email)
-	if err == nil {
-		return errors.New("email already exists")
-	}
-
-	// Check if username already exists
-	_, err = uc.userRepo.FindByUsername(user.Username)
-	if err == nil {
-		return errors.New("username already exists")
-	}
-
-	return uc.userRepo.Create(user)
-}
-
-func (uc *userUsecase) Login(email, password string) (string, error) {
-	user, err := uc.userRepo.FindByEmail(email)
+// Đăng ký tài khoản mới
+func (uc *UserUsecase) Register(user *models.User) error {
+	hashedPassword, err := utils.HashPassword(user.Password)
 	if err != nil {
-		return "", errors.New("invalid credentials")
+		return err
 	}
-
-	if !utils.CheckPasswordHash(password, user.PasswordHash) {
-		return "", errors.New("invalid credentials")
-	}
-
-	// Create JWT token
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": user.ID,
-		"exp":     time.Now().Add(time.Hour * 24).Unix(), // 24 hours
-	})
-
-	return token.SignedString([]byte(uc.config.App.JWTSecret))
+	user.Password = hashedPassword
+	return uc.UserRepo.CreateUser(user)
 }
 
-func (uc *userUsecase) GetUserByID(id uint) (*domain.User, error) {
-	return uc.userRepo.FindByID(id)
+// Đăng nhập và tạo JWT token
+func (uc *UserUsecase) Login(email, password string) (string, error) {
+	user, err := uc.UserRepo.GetUserByEmail(email)
+	if err != nil {
+		return "", errors.New("invalid email or password")
+	}
+
+	if !utils.CheckPasswordHash(password, user.Password) {
+		return "", errors.New("invalid email or password")
+	}
+
+	token, err := utils.GenerateToken(user.ID)
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+// Lấy thông tin user
+func (uc *UserUsecase) GetUserByID(id uint) (*models.User, error) {
+	return uc.UserRepo.GetUserByID(id)
+}
+
+// Cập nhật thông tin user
+func (uc *UserUsecase) UpdateUser(user *models.User) error {
+	return uc.UserRepo.UpdateUser(user)
+}
+
+// Xóa user
+func (uc *UserUsecase) DeleteUser(id uint) error {
+	return uc.UserRepo.DeleteUser(id)
 }
