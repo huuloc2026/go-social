@@ -7,6 +7,10 @@ import (
 	"github.com/spf13/viper"
 )
 
+type AppConfigSetup struct {
+	Port int `mapstructure:"port"`
+}
+
 type DBConfig struct {
 	Host     string `mapstructure:"host"`
 	Port     int    `mapstructure:"port"`
@@ -16,7 +20,8 @@ type DBConfig struct {
 }
 
 type Config struct {
-	PostgresDB DBConfig `mapstructure:"database"`
+	AppConfig  AppConfigSetup `mapstructure:"app"`
+	PostgresDB DBConfig       `mapstructure:"database"`
 }
 
 func LoadConfig() *Config {
