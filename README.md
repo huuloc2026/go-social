@@ -1,9 +1,10 @@
+```
 go-social/
-│── cmd/                  # Entry point của ứng dụng
+│── cmd/               
 │   ├── main.go
 │── config/               # Config (Viper)
 │   ├── config.yaml
-│── internal/             # Core business logic (Domain)
+│── internal/    
 │   ├── auth/             # Authentication logic
 │   ├── post/             # Post logic
 │   ├── user/             # User management
@@ -17,25 +18,29 @@ go-social/
 │── go.mod
 │── go.sum
 │── README.md
-
+```
 # Register a new user
+```
 curl -X POST -H "Content-Type: application/json" -d '{
   "username": "testuser",
   "email": "test@example.com",
   "password": "password123"
 }' http://localhost:8888/api/auth/register
-
+```
 # Login
+```
 curl -X POST -H "Content-Type: application/json" -d '{
   "email": "test@example.com",
   "password": "password123"
 }' http://localhost:8888/api/auth/login
-
+```
 # Get current user (use the token from login)
+```
 curl -X GET -H "Authorization: Bearer <YOUR_TOKEN>" http://localhost:8000/api/me
+```
 
-API Endpoints Design
-Authentication
+# API Endpoints Design
+## Authentication
 
     POST /api/auth/register - User registration
 
@@ -45,7 +50,7 @@ Authentication
 
     GET /api/auth/me - Get current user info
 
-User Management
+## User Management
 
     GET /api/users - List users (with pagination)
 
@@ -53,7 +58,7 @@ User Management
 
     PUT /api/users/:id - Update user profile
 
-Post Management
+## Post Management
 
     POST /api/posts - Create new post
 
@@ -65,7 +70,7 @@ Post Management
 
     DELETE /api/posts/:id - Delete post
 
-Friendship System
+## Friendship System
 
     POST /api/friends/request - Send friend request
 
@@ -75,7 +80,7 @@ Friendship System
 
     DELETE /api/friends/reject/:id - Reject/unfriend
 
-Interactions
+## Interactions
 
     POST /api/posts/:id/comments - Add comment to post
 
@@ -83,12 +88,12 @@ Interactions
 
     DELETE /api/posts/:id/like - Remove like
 
-Notifications
+## Notifications
 
     GET /api/notifications - Get user notifications
 
     PUT /api/notifications/:id/read - Mark as read
 
-News Feed
+## News Feed
 
     GET /api/feed - Get personalized news feed

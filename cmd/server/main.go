@@ -28,11 +28,31 @@ func main() {
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 
+	// Initialize Redis cache
+	//redisCache := cache.NewRedisCache(cfg.Redis.Host, cfg.Redis.Port, cfg.Redis.Password, cfg.Redis.DB)
+
+	// Initialize RabbitMQ
+	//rabbitMQ := queue.NewRabbitMQ(cfg.RabbitMQ.Host, cfg.RabbitMQ.Port, cfg.RabbitMQ.User, cfg.RabbitMQ.Password)
+	//defer rabbitMQ.Close()
+
 	// Initialize repositories
 	userRepo := domain.NewUserRepository(db.DB)
+	//postRepo := domain.NewPostRepository(db.DB)
+	// friendshipRepo := domain.NewFriendshipRepository(db.DB)
+	// commentRepo := domain.NewCommentRepository(db.DB)
+	// likeRepo := domain.NewLikeRepository(db.DB)
+	// notificationRepo := domain.NewNotificationRepository(db.DB)
+
+	// Initialize services
+	//notificationService := domain.NewNotificationService(notificationRepo, rabbitMQ)
 
 	// Initialize use cases
 	userUsecase := usecases.NewUserUsecase(userRepo, cfg)
+	//postUsecase := usecases.NewPostUsecase(postRepo, notificationService)
+	// friendshipUsecase := usecases.NewFriendshipUsecase(friendshipRepo, userRepo, notificationService)
+	// interactionUsecase := usecases.NewInteractionUsecase(commentRepo, likeRepo, postRepo, notificationService)
+	// feedUsecase := usecases.NewFeedUsecase(postRepo, friendshipRepo, redisCache)
+	// notificationUsecase := usecases.NewNotificationUsecase(notificationRepo)
 
 	// Create Fiber app
 	app := fiber.New(fiber.Config{
