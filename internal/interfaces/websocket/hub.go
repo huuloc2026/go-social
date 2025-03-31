@@ -1,5 +1,5 @@
 // // internal/interfaces/websocket/hub.go
-// package websocket
+package websocket
 
 // type Hub struct {
 // 	clients    map[*Client]bool

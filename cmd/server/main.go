@@ -3,11 +3,11 @@ package main
 import (
 	"log"
 
+	"github.com/huuloc2026/go-social/infrastructure/database"
 	"github.com/huuloc2026/go-social/internal/interfaces/http"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/huuloc2026/go-social/internal/config"
-	"github.com/huuloc2026/go-social/internal/config/database"
 	"github.com/huuloc2026/go-social/internal/domain"
 	"github.com/huuloc2026/go-social/internal/usecases"
 )

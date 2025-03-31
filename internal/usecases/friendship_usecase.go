@@ -1,4 +1,4 @@
-// package usecases
+package usecases
 
 // import "github.com/huuloc2026/go-social/internal/domain"
 

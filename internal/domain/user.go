@@ -2,6 +2,8 @@ package domain
 
 import (
 	"time"
+
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -13,16 +15,16 @@ type User struct {
 	UpdatedAt    time.Time `gorm:"autoUpdateTime" json:"updated_at"`
 }
 
-// func (u *User) BeforeCreate(tx *gorm.DB) error {
-// 	u.CreatedAt = time.Now().UTC()
-// 	u.UpdatedAt = time.Now().UTC()
-// 	return nil
-// }
+func (u *User) BeforeCreate(tx *gorm.DB) error {
+	u.CreatedAt = time.Now().UTC()
+	u.UpdatedAt = time.Now().UTC()
+	return nil
+}
 
-// func (u *User) BeforeUpdate(tx *gorm.DB) error {
-// 	u.UpdatedAt = time.Now().UTC()
-// 	return nil
-// }
+func (u *User) BeforeUpdate(tx *gorm.DB) error {
+	u.UpdatedAt = time.Now().UTC()
+	return nil
+}
 
 // UserService defines the business logic operations for users
 type UserService interface {
