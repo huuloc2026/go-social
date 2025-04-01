@@ -17,12 +17,22 @@ func SetupRoutes(app *fiber.App,
 	userHandler := handlers.NewUserController(userUseCase)
 	postHanlder := handlers.NewPostController(postUseCase)
 	likeHandler := handlers.NewLikeHandler(likeUseCase)
-	// Auth routes
+	//////////////////////////////////////////////////
+	//                                              //
+	//                 Auth routes                  //
+	//                                              //
+	//////////////////////////////////////////////////
+
 	auth := app.Group("/auth")
 	auth.Post("/register", authHandler.Register)
 	auth.Post("/login", authHandler.Login)
 
-	// User routes
+	//////////////////////////////////////////////////
+	//                                              //
+	//                 User routes                  //
+	//                                              //
+	//////////////////////////////////////////////////
+
 	user := app.Group("/users")
 	user.Use(middlewares.AuthMiddleware(authUseCase))
 	user.Get("/", userHandler.GetAllUsers)
@@ -30,7 +40,12 @@ func SetupRoutes(app *fiber.App,
 	user.Put("/:id", userHandler.UpdateUser)
 	user.Delete("/:id", userHandler.DeleteUser)
 
-	// Post Routes
+	//////////////////////////////////////////////////
+	//                                              //
+	//                 Post Routes                  //
+	//                                              //
+	//////////////////////////////////////////////////
+
 	post := app.Group("/posts")
 	post.Use(middlewares.AuthMiddleware(authUseCase))
 	post.Post("/", postHanlder.CreatePost)

@@ -16,23 +16,51 @@ import (
 )
 
 func main() {
-	// Load configuration
+	//////////////////////////////////////////////////
+	//                                              //
+	//              Load configuration              //
+	//                                              //
+	//////////////////////////////////////////////////
+
 	cfg, err := config.LoadConfig(".")
 	if err != nil {
 		log.Fatal("Cannot load config:", err)
 	}
 
-	// Initialize JWT
+	//////////////////////////////////////////////////
+	//                                              //
+	//               Initialize JWT                 //
+	//                                              //
+	//////////////////////////////////////////////////
+
 	utils.InitJWT(cfg.JWTSecret, cfg.JWTExpiration, cfg.RefreshExpiration)
 
-	// Initialize database
+	//////////////////////////////////////////////////
+	//                                              //
+	//             Initialize database              //
+	//                                              //
+	//////////////////////////////////////////////////
+
 	db, err := database.NewPostgresDB(&cfg)
 	if err != nil {
 		log.Fatal("Cannot connect to database:", err)
 	}
 
+	//////////////////////////////////////////////////
+	//                                              //
+	//                  Service Mail                //
+	//                                              //
+	//////////////////////////////////////////////////
+
 	//mailer := mail.NewNodeMailer(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUser, cfg.SMTPPassword)
+
+	//////////////////////////////////////////////////
+	//                                              //
+	//                Service Cache                 //
+	//                                              //
+	//////////////////////////////////////////////////
 	//cache := cache.NewRedisCache(cfg.RedisURL)
+
 	refreshExpiry := time.Duration(cfg.RefreshExpiration) * time.Second
 
 	// Initialize repositories
@@ -53,7 +81,12 @@ func main() {
 	// Setup routes
 	http.SetupRoutes(app, authUseCase, userUseCase, postUseCase, likeUseCase)
 
-	// Start server
+	//////////////////////////////////////////////////
+	//                                              //
+	//                 Start server                 //
+	//                                              //
+	//////////////////////////////////////////////////
+
 	port := ":" + cfg.Port
 	if err := app.Listen(port); err != nil {
 		log.Fatal("Failed to start server:", err)
