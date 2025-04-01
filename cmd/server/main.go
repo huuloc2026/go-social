@@ -37,9 +37,11 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repositories.NewUserRepository(db)
+	postRepo := repositories.NewPostRepository(db)
 
 	// Initialize use cases
 	userUseCase := usecases.NewUserUseCase(userRepo)
+	postUseCase := usecases.NewPostUseCase(postRepo)
 	authUseCase := usecases.NewAuthUseCase(userRepo, refreshExpiry)
 
 	// Create Fiber app
@@ -47,7 +49,7 @@ func main() {
 	app := fiber.New()
 
 	// Setup routes
-	http.SetupRoutes(app, authUseCase, userUseCase)
+	http.SetupRoutes(app, authUseCase, userUseCase, postUseCase)
 
 	// Start server
 	port := ":" + cfg.Port

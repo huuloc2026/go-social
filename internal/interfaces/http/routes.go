@@ -7,19 +7,33 @@ import (
 	"github.com/huuloc2026/go-social/internal/interfaces/http/middlewares"
 )
 
-func SetupRoutes(app *fiber.App, authUseCase usecases.AuthUseCase, userUseCase usecases.UserUseCase) {
-	authController := handlers.NewAuthController(authUseCase)
-	userController := handlers.NewUserController(userUseCase)
-
+func SetupRoutes(app *fiber.App,
+	authUseCase usecases.AuthUseCase,
+	userUseCase usecases.UserUseCase,
+	postUseCase usecases.PostUseCase,
+) {
+	authHandler := handlers.NewAuthController(authUseCase)
+	userHandler := handlers.NewUserController(userUseCase)
+	postHanlder := handlers.NewPostController(postUseCase)
 	// Auth routes
 	auth := app.Group("/auth")
-	auth.Post("/register", authController.Register)
-	auth.Post("/login", authController.Login)
+	auth.Post("/register", authHandler.Register)
+	auth.Post("/login", authHandler.Login)
 
 	// User routes
 	user := app.Group("/users")
 	user.Use(middlewares.AuthMiddleware(authUseCase))
-	user.Get("/:id", userController.GetUser)
-	user.Put("/:id", userController.UpdateUser)
-	user.Delete("/:id", userController.DeleteUser)
+	user.Get("/", userHandler.GetAllUsers)
+	user.Get("/:id", userHandler.GetUser)
+	user.Put("/:id", userHandler.UpdateUser)
+	user.Delete("/:id", userHandler.DeleteUser)
+
+	// Post Routes
+	post := app.Group("/posts")
+	post.Use(middlewares.AuthMiddleware(authUseCase))
+	post.Get("/", postHanlder.GetAllPosts)
+	post.Get("/:id", postHanlder.GetPostByID)
+	post.Put("/:id", postHanlder.UpdatePost)
+	post.Delete("/:id", postHanlder.DeletePost)
+
 }

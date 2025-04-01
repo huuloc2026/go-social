@@ -28,6 +28,21 @@ func (r *userRepository) FindByID(ctx context.Context, id uint) (*entities.User,
 	return &user, nil
 }
 
+func (r *userRepository) FindAllWithPagination(ctx context.Context, offset, limit int) ([]*entities.User, error) {
+	var users []*entities.User
+	if err := r.db.WithContext(ctx).Offset(offset).Limit(limit).Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
+}
+func (r *userRepository) CountAll(ctx context.Context) (int, error) {
+	var count int64
+	if err := r.db.WithContext(ctx).Model(&entities.User{}).Count(&count).Error; err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
+
 func (r *userRepository) FindByEmail(ctx context.Context, email string) (*entities.User, error) {
 	var user entities.User
 	if err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error; err != nil {

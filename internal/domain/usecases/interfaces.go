@@ -8,6 +8,7 @@ import (
 
 type UserUseCase interface {
 	GetUserByID(ctx context.Context, id uint) (*entities.User, error)
+	GetAllUsers(ctx context.Context, page, limit int) ([]*entities.User, int, error)
 	UpdateUser(ctx context.Context, user *entities.User) error
 	DeleteUser(ctx context.Context, id uint) error
 }

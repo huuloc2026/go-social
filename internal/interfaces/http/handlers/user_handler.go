@@ -9,15 +9,15 @@ import (
 	"github.com/huuloc2026/go-social/internal/utils"
 )
 
-type UserController struct {
+type UserHandler struct {
 	userUseCase usecases.UserUseCase
 }
 
-func NewUserController(userUseCase usecases.UserUseCase) *UserController {
-	return &UserController{userUseCase: userUseCase}
+func NewUserController(userUseCase usecases.UserUseCase) *UserHandler {
+	return &UserHandler{userUseCase: userUseCase}
 }
 
-func (c *UserController) GetUser(ctx *fiber.Ctx) error {
+func (c *UserHandler) GetUser(ctx *fiber.Ctx) error {
 	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
 		return utils.ErrorResponse(ctx, fiber.StatusBadRequest, "Invalid user ID")
@@ -31,7 +31,27 @@ func (c *UserController) GetUser(ctx *fiber.Ctx) error {
 	return utils.SuccessResponse(ctx, fiber.StatusOK, user)
 }
 
-func (c *UserController) UpdateUser(ctx *fiber.Ctx) error {
+func (h *UserHandler) GetAllUsers(c *fiber.Ctx) error {
+	page := c.QueryInt("page", 1)    // Default to page 1 if not provided
+	limit := c.QueryInt("limit", 10) // Default to 10 items per page if not provided
+
+	users, total, err := h.userUseCase.GetAllUsers(c.Context(), page, limit)
+	if err != nil {
+		return err
+	}
+
+	// Calculate total pages
+	totalPages := (total + limit - 1) / limit
+
+	return c.JSON(fiber.Map{
+		"data":         users,
+		"total":        total,
+		"total_pages":  totalPages,
+		"current_page": page,
+	})
+}
+
+func (c *UserHandler) UpdateUser(ctx *fiber.Ctx) error {
 	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
 		return utils.ErrorResponse(ctx, fiber.StatusBadRequest, "Invalid user ID")
@@ -50,7 +70,7 @@ func (c *UserController) UpdateUser(ctx *fiber.Ctx) error {
 	return utils.SuccessResponse(ctx, fiber.StatusOK, fiber.Map{"message": "User updated successfully"})
 }
 
-func (c *UserController) DeleteUser(ctx *fiber.Ctx) error {
+func (c *UserHandler) DeleteUser(ctx *fiber.Ctx) error {
 	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
 		return utils.ErrorResponse(ctx, fiber.StatusBadRequest, "Invalid user ID")
