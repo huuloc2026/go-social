@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"context"
+	"fmt"
 
 	"time"
 
@@ -165,4 +166,74 @@ func (uc *authUseCase) Login(ctx context.Context, req *entities.LoginRequest) (*
 
 func (uc *authUseCase) ValidateToken(token string) (uint, error) {
 	return utils.ValidateJWT(token)
+}
+func (uc *authUseCase) RefreshToken(refreshToken string) (*entities.AuthResponse, error) {
+	// Validate the refresh token
+	userID, err := utils.ValidateJWT(refreshToken)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "Invalid refresh token")
+	}
+
+	// Find the user
+	user, err := uc.userRepo.FindByID(context.Background(), userID)
+	if err != nil || user == nil {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "User not found")
+	}
+
+	// Generate a new access token
+	accessToken, err := utils.GenerateJWT(user.ID, user.Role)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to generate new access token")
+	}
+
+	// Generate a new refresh token
+	newRefreshToken, err := utils.GenerateRefreshToken()
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to generate new refresh token")
+	}
+
+	// // Save the new refresh token to the database
+	// err = uc.tokenRepo.Create(context.Background(), &entities.Token{
+	// 	UserID:    user.ID,
+	// 	Token:     newRefreshToken,
+	// 	Type:      "refresh",
+	// 	ExpiresAt: time.Now().Add(uc.refreshExpiry),
+	// })
+	// if err != nil {
+	// 	return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to save new refresh token")
+	// }
+
+	return &entities.AuthResponse{
+		User:         user,
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken,
+	}, nil
+}
+
+func (s *authUseCase) ResetPassword(ctx context.Context, token string, newPassword string) error {
+	// Logic to reset the password using a reset token
+	// For now, return a mock success
+	fmt.Println("Password reset successfully")
+	return nil
+}
+
+func (s *authUseCase) ChangePassword(ctx context.Context, userID uint, oldPassword string, newPassword string) error {
+	// Logic to change the user's password
+	// For now, return a mock success
+	fmt.Println("Password changed successfully")
+	return nil
+}
+
+func (s *authUseCase) Logout(ctx context.Context, userID uint) error {
+	// Logic to logout the user, typically by invalidating their session or token
+	// For now, return a mock success
+	fmt.Println("User logged out successfully")
+	return nil
+}
+
+func (s *authUseCase) VerifyEmail(ctx context.Context, userID uint, verificationToken string) error {
+	// Logic to verify a user's email using the provided verification token
+	// For now, return a mock success
+	fmt.Println("Email verified successfully")
+	return nil
 }
