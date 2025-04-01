@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	// Import the correct config package
 	"github.com/huuloc2026/go-social/config"
-	"github.com/huuloc2026/go-social/internal/domain/entities"
+	"github.com/huuloc2026/go-social/internal/domain/entities" // Import the pq package for PostgreSQL array support
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -22,21 +21,23 @@ func NewPostgresDB(cfg *config.Config) (*gorm.DB, error) {
 		return nil, err
 	}
 
+	// Perform AutoMigrate to create the schema for the models
 	models := []interface{}{
 		&entities.User{},
 		&entities.Post{},
-		// Add all your models here
+		// Add other models as needed
 	}
 
-	// Perform AutoMigrate to create the schema
+	// Automatically migrate the schema
 	for _, model := range models {
 		if err := db.AutoMigrate(model); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("failed to migrate model %T: %w", model, err)
 		}
 	}
 
 	// Log successful database connection
-	log.Println("Database Connection successfully established")
+	log.Println("Database connection successfully established")
 
+	// Return the database connection object
 	return db, nil
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/huuloc2026/go-social/internal/domain/usecases"
+	"github.com/huuloc2026/go-social/internal/utils"
 )
 
 type PostHandler struct {
@@ -16,23 +17,22 @@ func NewPostController(postUseCase usecases.PostUseCase) *PostHandler {
 }
 
 func (c *PostHandler) CreatePost(ctx *fiber.Ctx) error {
+	userID, _ := utils.ExtractUserID(ctx)
 	var request struct {
-		Content string   `json:"content"`
-		Images  []string `json:"images"`
-		Videos  []string `json:"videos"`
+		Content string `json:"content"`
+		Image   string `json:"image"`
 	}
 
 	if err := ctx.BodyParser(&request); err != nil {
-		return err
+		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
 	}
 
-	userID := 1 // For now, you can pass the userID from the session or JWT token
-	post, err := c.postUseCase.CreatePost(ctx.Context(), uint(userID), request.Content, request.Images, request.Videos)
+	createdPost, err := c.postUseCase.CreatePost(ctx.Context(), uint(userID), request.Content, request.Image)
 	if err != nil {
 		return err
 	}
 
-	return ctx.Status(fiber.StatusCreated).JSON(post)
+	return ctx.Status(fiber.StatusCreated).JSON(createdPost)
 }
 
 func (c *PostHandler) GetPostByID(ctx *fiber.Ctx) error {
@@ -68,16 +68,15 @@ func (c *PostHandler) UpdatePost(ctx *fiber.Ctx) error {
 	}
 
 	var request struct {
-		Content string   `json:"content"`
-		Images  []string `json:"images"`
-		Videos  []string `json:"videos"`
+		Content string `json:"content"`
+		Image   string `json:"image"` // Cập nhật lại ảnh (nếu có)
 	}
 
 	if err := ctx.BodyParser(&request); err != nil {
 		return err
 	}
 
-	post, err := c.postUseCase.UpdatePost(ctx.Context(), uint(id), request.Content, request.Images, request.Videos)
+	post, err := c.postUseCase.UpdatePost(ctx.Context(), uint(id), request.Content, request.Image)
 	if err != nil {
 		return err
 	}

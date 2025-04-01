@@ -9,10 +9,10 @@ import (
 )
 
 type PostUseCase interface {
-	CreatePost(ctx context.Context, userID uint, content string, images []string, videos []string) (*entities.Post, error)
+	CreatePost(ctx context.Context, userID uint, content string, images string) (*entities.Post, error)
 	GetPostByID(ctx context.Context, id uint) (*entities.Post, error)
 	GetAllPosts(ctx context.Context, offset, limit int) ([]entities.Post, error)
-	UpdatePost(ctx context.Context, id uint, content string, images []string, videos []string) (*entities.Post, error)
+	UpdatePost(ctx context.Context, id uint, content string, images string) (*entities.Post, error)
 	DeletePost(ctx context.Context, id uint) error
 }
 
@@ -23,14 +23,14 @@ type postUseCase struct {
 func NewPostUseCase(postRepo repositories.PostRepository) PostUseCase {
 	return &postUseCase{postRepo}
 }
+func (uc *postUseCase) CreatePost(ctx context.Context, userID uint, content string, images string) (*entities.Post, error) {
 
-func (uc *postUseCase) CreatePost(ctx context.Context, userID uint, content string, images []string, videos []string) (*entities.Post, error) {
 	post := &entities.Post{
 		UserID:  userID,
 		Content: content,
-		Images:  images,
-		Videos:  videos,
+		Image:   images,
 	}
+
 	return uc.postRepo.Create(ctx, post)
 }
 
@@ -42,15 +42,14 @@ func (uc *postUseCase) GetAllPosts(ctx context.Context, offset, limit int) ([]en
 	return uc.postRepo.GetAll(ctx, offset, limit)
 }
 
-func (uc *postUseCase) UpdatePost(ctx context.Context, id uint, content string, images []string, videos []string) (*entities.Post, error) {
+func (uc *postUseCase) UpdatePost(ctx context.Context, id uint, content string, images string) (*entities.Post, error) {
 	post, err := uc.postRepo.GetByID(ctx, id)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusNotFound, "Post not found")
 	}
 
 	post.Content = content
-	post.Images = images
-	post.Videos = videos
+	post.Image = images
 
 	return uc.postRepo.Update(ctx, post)
 }

@@ -1,16 +1,15 @@
 package entities
 
-import "time"
+import (
+	"time"
+)
 
-// Post struct represents a Post entity in the system
 type Post struct {
-	ID        uint      `gorm:"primaryKey"`
-	UserID    uint      `gorm:"not null"` // Foreign key to User
-	Content   string    `gorm:"type:text;not null"`
-	Images    []string  `gorm:"type:text[]"`
-	Videos    []string  `gorm:"type:text[]"`
-	CreatedAt time.Time `gorm:"autoCreateTime"`
-	UpdatedAt time.Time `gorm:"autoUpdateTime"`
-	Likes     uint      `gorm:"default:0"`
-	Comments  []Comment // Relationship with Comment entity
+	ID        uint      `json:"id"`
+	UserID    uint      `json:"user_id"`
+	Content   string    `json:"content"`
+	Image     string    `json:"image"` // Chỉ giữ lại 1 string cho ảnh
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	Likes     int       `json:"likes"`
 }
