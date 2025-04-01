@@ -22,9 +22,17 @@ func NewPostgresDB(cfg *config.Config) (*gorm.DB, error) {
 		return nil, err
 	}
 
+	models := []interface{}{
+		&entities.User{},
+		&entities.Post{},
+		// Add all your models here
+	}
+
 	// Perform AutoMigrate to create the schema
-	if err := db.AutoMigrate(&entities.User{}); err != nil {
-		return nil, err
+	for _, model := range models {
+		if err := db.AutoMigrate(model); err != nil {
+			return nil, err
+		}
 	}
 
 	// Log successful database connection

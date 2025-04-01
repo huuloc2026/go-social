@@ -5,7 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/huuloc2026/go-social/internal/domain/entities"
-	"github.com/huuloc2026/go-social/internal/interfaces/http/repositories"
+	"github.com/huuloc2026/go-social/internal/domain/repositories"
 )
 
 type PostUseCase interface {

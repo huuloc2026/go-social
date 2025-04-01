@@ -3,23 +3,17 @@ package repositories
 import (
 	"context"
 
-	"github.com/huuloc2026/go-social/internal/domain/entities"
 	"gorm.io/gorm"
-)
 
-type PostRepository interface {
-	Create(ctx context.Context, post *entities.Post) (*entities.Post, error)
-	GetByID(ctx context.Context, id uint) (*entities.Post, error)
-	GetAll(ctx context.Context, offset, limit int) ([]entities.Post, error)
-	Update(ctx context.Context, post *entities.Post) (*entities.Post, error)
-	Delete(ctx context.Context, id uint) error
-}
+	"github.com/huuloc2026/go-social/internal/domain/entities"
+	"github.com/huuloc2026/go-social/internal/domain/repositories"
+)
 
 type postRepository struct {
 	db *gorm.DB
 }
 
-func NewPostRepository(db *gorm.DB) PostRepository {
+func NewPostRepository(db *gorm.DB) repositories.PostRepository {
 	return &postRepository{db}
 }
 
