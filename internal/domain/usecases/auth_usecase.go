@@ -6,27 +6,21 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/huuloc2026/go-social/internal/cache"
 	"github.com/huuloc2026/go-social/internal/domain/entities"
 	"github.com/huuloc2026/go-social/internal/domain/repositories"
-	"github.com/huuloc2026/go-social/internal/mail"
 	"github.com/huuloc2026/go-social/internal/utils"
 )
 
 type authUseCase struct {
-	userRepo      repositories.UserRepository
-	tokenRepo     repositories.TokenRepository
-	mailer        mail.NewNodeMailer
-	cache         cache.RedisCache
+	userRepo repositories.UserRepository
+	// mailer        mail.NewNodeMailer
+	// cache         cache.RedisCache
 	refreshExpiry time.Duration
 }
 
-func NewAuthUseCase(userRepo repositories.UserRepository, tokenRepo repositories.TokenRepository, mailer mail.NewNodeMailer, cache cache.RedisCache, refreshExpiry time.Duration) AuthUseCase {
+func NewAuthUseCase(userRepo repositories.UserRepository, refreshExpiry time.Duration) AuthUseCase {
 	return &authUseCase{
 		userRepo:      userRepo,
-		tokenRepo:     tokenRepo,
-		mailer:        mailer,
-		cache:         cache,
 		refreshExpiry: refreshExpiry,
 	}
 }
@@ -62,23 +56,23 @@ func (uc *authUseCase) Register(ctx context.Context, req *entities.RegisterReque
 	}
 
 	// Generate verification token
-	verificationToken, err := utils.GenerateRefreshToken()
-	if err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to generate verification token")
-	}
+	// verificationToken, err := utils.GenerateRefreshToken()
+	// if err != nil {
+	// 	return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to generate verification token")
+	// }
 
 	// Save verification token
-	if err := uc.tokenRepo.Create(ctx, &entities.Token{
-		UserID:    user.ID,
-		Token:     verificationToken,
-		Type:      "verification",
-		ExpiresAt: time.Now().Add(24 * time.Hour),
-	}); err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to save verification token")
-	}
+	// if err := uc.tokenRepo.Create(ctx, &entities.Token{
+	// 	UserID:    user.ID,
+	// 	Token:     verificationToken,
+	// 	Type:      "verification",
+	// 	ExpiresAt: time.Now().Add(24 * time.Hour),
+	// }); err != nil {
+	// 	return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to save verification token")
+	// }
 
 	// Send verification email (async)
-	go uc.mailer.SendVerificationEmail(user.Email, verificationToken)
+	//go uc.mailer.SendVerificationEmail(user.Email, verificationToken)
 
 	// Generate tokens
 	accessToken, err := utils.GenerateJWT(user.ID, user.Role)
@@ -92,14 +86,14 @@ func (uc *authUseCase) Register(ctx context.Context, req *entities.RegisterReque
 	}
 
 	// Save refresh token
-	if err := uc.tokenRepo.Create(ctx, &entities.Token{
-		UserID:    user.ID,
-		Token:     refreshToken,
-		Type:      "refresh",
-		ExpiresAt: time.Now().Add(uc.refreshExpiry),
-	}); err != nil {
-		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to save refresh token")
-	}
+	// if err := uc.tokenRepo.Create(ctx, &entities.Token{
+	// 	UserID:    user.ID,
+	// 	Token:     refreshToken,
+	// 	Type:      "refresh",
+	// 	ExpiresAt: time.Now().Add(uc.refreshExpiry),
+	// }); err != nil {
+	// 	return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to save refresh token")
+	// }
 
 	// Update last login
 	now := time.Now()
