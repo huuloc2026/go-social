@@ -1,17 +1,13 @@
-import { redirect } from "next/navigation"
-import { Newsfeed } from "@/components/newsfeed"
-import { getAuthToken } from "@/lib/auth"
+import { Feed } from "@/components/feed"
+import { Header } from "@/components/header"
 
 export default function Home() {
-  // Check if user is authenticated, redirect to login if not
-  const token = getAuthToken()
-  if (!token) {
-    redirect("/auth/login")
-  }
-
   return (
-    <main className="container mx-auto px-4 py-6">
-      <Newsfeed />
+    <main className="min-h-screen bg-background">
+      <Header />
+      <div className="container max-w-4xl py-8">
+        <Feed />
+      </div>
     </main>
   )
 }
