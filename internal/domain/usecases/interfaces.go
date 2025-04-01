@@ -6,14 +6,6 @@ import (
 	"github.com/huuloc2026/go-social/internal/domain/entities"
 )
 
-type UserRepository interface {
-	Create(ctx context.Context, user *entities.User) error
-	FindByID(ctx context.Context, id uint) (*entities.User, error)
-	FindByEmail(ctx context.Context, email string) (*entities.User, error)
-	Update(ctx context.Context, user *entities.User) error
-	Delete(ctx context.Context, id uint) error
-}
-
 type UserUseCase interface {
 	GetUserByID(ctx context.Context, id uint) (*entities.User, error)
 	UpdateUser(ctx context.Context, user *entities.User) error
@@ -21,7 +13,7 @@ type UserUseCase interface {
 }
 
 type AuthUseCase interface {
-	Register(ctx context.Context, req *entities.RegisterRequest) (*entities.User, error)
-	Login(ctx context.Context, req *entities.LoginRequest) (string, error)
+	Register(ctx context.Context, req *entities.RegisterRequest) (*entities.AuthResponse, error)
+	Login(ctx context.Context, req *entities.LoginRequest) (*entities.AuthResponse, error)
 	ValidateToken(token string) (uint, error)
 }

@@ -5,13 +5,14 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/huuloc2026/go-social/internal/domain/entities"
+	"github.com/huuloc2026/go-social/internal/domain/repositories"
 )
 
 type userUseCase struct {
-	userRepo UserRepository
+	userRepo repositories.UserRepository
 }
 
-func NewUserUseCase(userRepo UserRepository) UserUseCase {
+func NewUserUseCase(userRepo repositories.UserRepository) UserUseCase {
 	return &userUseCase{userRepo: userRepo}
 }
 
