@@ -109,9 +109,60 @@ func (uc *authUseCase) Register(ctx context.Context, req *entities.RegisterReque
 	}, nil
 }
 func (uc *authUseCase) Login(ctx context.Context, req *entities.LoginRequest) (*entities.AuthResponse, error) {
-	return nil, nil
+	// Validate request
+	if err := utils.ValidateRequest(req); err != nil {
+		return nil, fiber.NewError(fiber.StatusBadRequest, err.Error())
+	}
+
+	// Find user by email
+	user, err := uc.userRepo.FindByEmail(ctx, req.Email)
+	if err != nil || user == nil {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "Invalid email or password")
+	}
+
+	// Verify password
+	if !utils.CheckPasswordHash(req.Password, user.Password) {
+		return nil, fiber.NewError(fiber.StatusUnauthorized, "Invalid email or password")
+	}
+
+	// Generate access token
+	accessToken, err := utils.GenerateJWT(user.ID, user.Role)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to generate access token")
+	}
+
+	// Generate refresh token
+	refreshToken, err := utils.GenerateRefreshToken()
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to generate refresh token")
+	}
+
+	// // Save refresh token to database
+	// err = uc.tokenRepo.Create(ctx, &entities.Token{
+	// 	UserID:    user.ID,
+	// 	Token:     refreshToken,
+	// 	Type:      "refresh",
+	// 	ExpiresAt: time.Now().Add(uc.refreshExpiry),
+	// })
+	// if err != nil {
+	// 	return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to save refresh token")
+	// }
+
+	// Update last login timestamp
+	now := time.Now()
+	user.LastLogin = &now
+	if err := uc.userRepo.Update(ctx, user); err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Failed to update last login")
+	}
+
+	// Return response
+	return &entities.AuthResponse{
+		User:         user,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	}, nil
 }
 
 func (uc *authUseCase) ValidateToken(token string) (uint, error) {
-	return 0, nil
+	return utils.ValidateJWT(token)
 }

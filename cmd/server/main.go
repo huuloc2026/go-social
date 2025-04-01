@@ -2,15 +2,14 @@ package main
 
 import (
 	"log"
-	"time"
-
 	"os"
+	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/huuloc2026/go-social/config"
-	"github.com/huuloc2026/go-social/infrastructure/database"
 
 	"github.com/huuloc2026/go-social/internal/domain/usecases"
+	"github.com/huuloc2026/go-social/internal/infrastructure/database"
 	"github.com/huuloc2026/go-social/internal/interfaces/http"
 	"github.com/huuloc2026/go-social/internal/interfaces/http/repositories"
 	"github.com/huuloc2026/go-social/internal/utils"
@@ -44,6 +43,7 @@ func main() {
 	authUseCase := usecases.NewAuthUseCase(userRepo, refreshExpiry)
 
 	// Create Fiber app
+
 	app := fiber.New()
 
 	// Setup routes
