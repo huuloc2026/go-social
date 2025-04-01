@@ -2,28 +2,24 @@ package http
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/middleware/logger"
-	"github.com/huuloc2026/go-social/internal/config"
+	"github.com/huuloc2026/go-social/internal/domain/usecases"
 	"github.com/huuloc2026/go-social/internal/interfaces/http/handlers"
-	"github.com/huuloc2026/go-social/internal/usecases"
+	"github.com/huuloc2026/go-social/internal/interfaces/http/middlewares"
 )
 
-func SetupRoutes(app *fiber.App, userUsecase usecases.UserUsecase, cfg *config.Config) {
-	// Middleware
-	app.Use(logger.New())
-	app.Use(NewAuthMiddleware(cfg.App.JWTSecret).Middleware)
+func SetupRoutes(app *fiber.App, authUseCase usecases.AuthUseCase, userUseCase usecases.UserUseCase) {
+	authController := handlers.NewAuthController(authUseCase)
+	userController := handlers.NewUserController(userUseCase)
 
-	// Handlers
-	userHandler := handlers.NewUserHandler(userUsecase)
+	// Auth routes
+	auth := app.Group("/auth")
+	auth.Post("/register", authController.Register)
+	auth.Post("/login", authController.Login)
 
-	// Routes
-	api := app.Group("/api")
-
-	// Auth routes (no auth required)
-	auth := api.Group("/auth")
-	auth.Post("/register", userHandler.Register)
-	auth.Post("/login", userHandler.Login)
-
-	// Authenticated routes
-	api.Get("/me", userHandler.GetCurrentUser)
+	// User routes
+	user := app.Group("/users")
+	user.Use(middlewares.AuthMiddleware(authUseCase))
+	user.Get("/:id", userController.GetUser)
+	user.Put("/:id", userController.UpdateUser)
+	user.Delete("/:id", userController.DeleteUser)
 }

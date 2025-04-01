@@ -1,106 +1,64 @@
 package handlers
 
 import (
-	"net/http"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/huuloc2026/go-social/internal/domain"
-	"github.com/huuloc2026/go-social/internal/usecases"
-	"github.com/huuloc2026/go-social/pkg/utils"
+	"github.com/huuloc2026/go-social/internal/domain/entities"
+	"github.com/huuloc2026/go-social/internal/domain/usecases"
+	"github.com/huuloc2026/go-social/internal/utils"
 )
 
-type UserHandler struct {
-	userUsecase usecases.UserUsecase
+type UserController struct {
+	userUseCase usecases.UserUseCase
 }
 
-func NewUserHandler(userUsecase usecases.UserUsecase) *UserHandler {
-	return &UserHandler{userUsecase: userUsecase}
+func NewUserController(userUseCase usecases.UserUseCase) *UserController {
+	return &UserController{userUseCase: userUseCase}
 }
 
-type RegisterRequest struct {
-	Username string `json:"username" validate:"required,min=3,max=50"`
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
-}
-
-func (h *UserHandler) Register(c *fiber.Ctx) error {
-	var req RegisterRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := utils.ValidateStruct(req); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	passwordHash, err := utils.HashPassword(req.Password)
+func (c *UserController) GetUser(ctx *fiber.Ctx) error {
+	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Failed to process password",
-		})
+		return utils.ErrorResponse(ctx, fiber.StatusBadRequest, "Invalid user ID")
 	}
 
-	user := &domain.User{
-		Username:     req.Username,
-		Email:        req.Email,
-		PasswordHash: passwordHash,
-	}
-
-	if err := h.userUsecase.Register(user); err != nil {
-		return c.Status(http.StatusConflict).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	return c.Status(http.StatusCreated).JSON(user)
-}
-
-type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=6"`
-}
-
-func (h *UserHandler) Login(c *fiber.Ctx) error {
-	var req LoginRequest
-	if err := c.BodyParser(&req); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": "Invalid request body",
-		})
-	}
-
-	// Validate request
-	if err := utils.ValidateStruct(req); err != nil {
-		return c.Status(http.StatusBadRequest).JSON(fiber.Map{
-			"error": err.Error(),
-		})
-	}
-
-	token, err := h.userUsecase.Login(req.Email, req.Password)
+	user, err := c.userUseCase.GetUserByID(ctx.Context(), uint(id))
 	if err != nil {
-		return c.Status(http.StatusUnauthorized).JSON(fiber.Map{
-			"error": "Invalid credentials",
-		})
+		return utils.ErrorResponse(ctx, err.(*fiber.Error).Code, err.Error())
 	}
 
-	return c.JSON(fiber.Map{
-		"token": token,
-	})
+	return utils.SuccessResponse(ctx, fiber.StatusOK, user)
 }
 
-func (h *UserHandler) GetCurrentUser(c *fiber.Ctx) error {
-	userID := c.Locals("userID").(uint)
-
-	user, err := h.userUsecase.GetUserByID(userID)
+func (c *UserController) UpdateUser(ctx *fiber.Ctx) error {
+	id, err := strconv.Atoi(ctx.Params("id"))
 	if err != nil {
-		return c.Status(http.StatusNotFound).JSON(fiber.Map{
-			"error": "User not found",
-		})
+		return utils.ErrorResponse(ctx, fiber.StatusBadRequest, "Invalid user ID")
 	}
 
-	return c.JSON(user)
+	var user entities.User
+	if err := ctx.BodyParser(&user); err != nil {
+		return utils.ErrorResponse(ctx, fiber.StatusBadRequest, "Invalid request body")
+	}
+
+	user.ID = uint(id)
+	if err := c.userUseCase.UpdateUser(ctx.Context(), &user); err != nil {
+		return utils.ErrorResponse(ctx, err.(*fiber.Error).Code, err.Error())
+	}
+
+	return utils.SuccessResponse(ctx, fiber.StatusOK, fiber.Map{"message": "User updated successfully"})
+}
+
+func (c *UserController) DeleteUser(ctx *fiber.Ctx) error {
+	id, err := strconv.Atoi(ctx.Params("id"))
+	if err != nil {
+		return utils.ErrorResponse(ctx, fiber.StatusBadRequest, "Invalid user ID")
+	}
+
+	if err := c.userUseCase.DeleteUser(ctx.Context(), uint(id)); err != nil {
+		return utils.ErrorResponse(ctx, err.(*fiber.Error).Code, err.Error())
+	}
+
+	return utils.SuccessResponse(ctx, fiber.StatusOK, fiber.Map{"message": "User deleted successfully"})
 }
