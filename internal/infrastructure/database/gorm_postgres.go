@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/huuloc2026/go-social/config"
-	"github.com/huuloc2026/go-social/internal/domain/entities" // Import the pq package for PostgreSQL array support
+	"github.com/huuloc2026/go-social/internal/domain/entities"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -25,6 +25,7 @@ func NewPostgresDB(cfg *config.Config) (*gorm.DB, error) {
 	models := []interface{}{
 		&entities.User{},
 		&entities.Post{},
+		&entities.Like{},
 		// Add other models as needed
 	}
 

@@ -22,7 +22,6 @@ func (c *PostHandler) CreatePost(ctx *fiber.Ctx) error {
 		Content string `json:"content"`
 		Image   string `json:"image"`
 	}
-
 	if err := ctx.BodyParser(&request); err != nil {
 		return fiber.NewError(fiber.StatusBadRequest, "Invalid request body")
 	}
