@@ -4,7 +4,8 @@ import { NextResponse } from "next/server"
 export async function POST(request: Request, { params }: { params: { id: string } }) {
   try {
     const postId = params.id
-    const token = cookies().get("auth_token")?.value
+    const cookieStore = await cookies()
+    const token = cookieStore.get("auth_token")?.value
 
     if (!token) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
@@ -33,7 +34,8 @@ export async function POST(request: Request, { params }: { params: { id: string 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const postId = params.id
-    const token = cookies().get("auth_token")?.value
+    const cookieStore = await cookies()
+    const token = cookieStore.get("auth_token")?.value
 
     if (!token) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })

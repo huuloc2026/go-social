@@ -5,7 +5,7 @@ import { Post } from "@/components/post"
 import { CreatePostForm } from "@/components/create-post-form"
 import { useAuth } from "@/context/auth-context"
 import { Button } from "@/components/ui/button"
-import { CloudCog, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 
 type PostType = {
   id: string
@@ -31,14 +31,14 @@ export function Feed() {
 
   const fetchPosts = async (pageNum = 1, append = false) => {
     try {
-      const res = await fetch(`/posts/`)
+      const res = await fetch(`/api/posts?page`)
 
       if (!res.ok) {
         throw new Error("Failed to fetch posts")
       }
 
       const data = await res.json()
-      
+
       if (append) {
         setPosts((prev) => [...prev, ...data.posts])
       } else {

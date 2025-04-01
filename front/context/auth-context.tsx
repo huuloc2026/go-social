@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
+import { useRouter } from "next/navigation"
 
 type User = {
   id: string
@@ -16,6 +17,7 @@ type AuthContextType = {
   register: (name: string, email: string, password: string) => Promise<void>
   logout: () => Promise<void>
   error: string | null
+  getAuthToken: () => string | null
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -24,9 +26,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
 
   // Check if user is logged in on initial load
-  useEffect(() => {
+  useEffectz(() => {
     const checkAuth = async () => {
       try {
         const res = await fetch("/api/auth/me")
@@ -43,6 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     checkAuth()
   }, [])
+
+  const getAuthToken = (): string | null => {
+    return (
+      document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("auth_token="))
+        ?.split("=")[1] || null
+    )
+  }
 
   const login = async (email: string, password: string) => {
     setError(null)
@@ -62,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setUser(data.user)
+      router.refresh()
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message)
@@ -90,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setUser(data.user)
+      router.refresh()
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message)
@@ -106,6 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         method: "POST",
       })
       setUser(null)
+      router.refresh()
     } catch (error) {
       console.error("Logout error:", error)
     }
@@ -120,6 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         register,
         logout,
         error,
+        getAuthToken,
       }}
     >
       {children}

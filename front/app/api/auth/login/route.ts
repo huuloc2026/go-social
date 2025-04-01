@@ -16,22 +16,22 @@ export async function POST(request: Request) {
     })
 
     const data = await response.json()
-   
+
     if (!response.ok) {
       return NextResponse.json({ error: data.message || "Login failed" }, { status: response.status })
     }
-      
-    console.log( data.data.token.access_token)
+
     // Set the JWT token in an HTTP-only cookie
     const cookieStore = await cookies()
     await cookieStore.set({
       name: "auth_token",
-      value: data.data.token.access_token,
+      value: data.token,
       httpOnly: true,
       path: "/",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7, 
+      maxAge: 60 * 60 * 24 * 7, // 1 week
     })
+
     // Return user data without the token (since it's in the cookie)
     return NextResponse.json({ user: data.user })
   } catch (error) {

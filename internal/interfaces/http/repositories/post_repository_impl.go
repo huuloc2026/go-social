@@ -26,7 +26,7 @@ func (r *postRepository) Create(ctx context.Context, post *entities.Post) (*enti
 
 func (r *postRepository) GetByID(ctx context.Context, id uint) (*entities.Post, error) {
 	var post entities.Post
-	if err := r.db.Preload("Comments").First(&post, id).Error; err != nil {
+	if err := r.db.First(&post, id).Error; err != nil {
 		return nil, err
 	}
 	return &post, nil
@@ -34,7 +34,7 @@ func (r *postRepository) GetByID(ctx context.Context, id uint) (*entities.Post, 
 
 func (r *postRepository) GetAll(ctx context.Context, offset, limit int) ([]entities.Post, error) {
 	var posts []entities.Post
-	if err := r.db.Offset(offset).Limit(limit).Preload("Comments").Find(&posts).Error; err != nil {
+	if err := r.db.Offset(offset).Limit(limit).Find(&posts).Error; err != nil {
 		return nil, err
 	}
 	return posts, nil
