@@ -2,6 +2,7 @@ package http
 
 import (
 	"github.com/gofiber/fiber/v2"
+
 	"github.com/huuloc2026/go-social/internal/domain/usecases"
 	"github.com/huuloc2026/go-social/internal/interfaces/http/handlers"
 	"github.com/huuloc2026/go-social/internal/interfaces/http/middlewares"

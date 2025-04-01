@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/huuloc2026/go-social/config"
 
 	"github.com/huuloc2026/go-social/internal/domain/usecases"
@@ -77,6 +78,12 @@ func main() {
 	// Create Fiber app
 
 	app := fiber.New()
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://localhost:3000",      // Allow frontend to access backend (replace with your frontend URL)
+		AllowMethods:     "GET,POST,PUT,DELETE",        // Allowed methods
+		AllowHeaders:     "Content-Type,Authorization", // Allowed headers
+		AllowCredentials: true,                         // Allow credentials (cookies, HTTP authentication)
+	}))
 
 	// Setup routes
 	http.SetupRoutes(app, authUseCase, userUseCase, postUseCase, likeUseCase)
