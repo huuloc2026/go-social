@@ -16,7 +16,7 @@ func NewLikeHandler(likeUseCase usecases.LikeUseCase) *LikeHandler {
 	return &LikeHandler{likeUseCase: likeUseCase}
 }
 
-// Like một post
+// Like post
 func (h *LikeHandler) LikePost(ctx *fiber.Ctx) error {
 	userID, _ := utils.ExtractUserID(ctx)
 
@@ -32,7 +32,7 @@ func (h *LikeHandler) LikePost(ctx *fiber.Ctx) error {
 	return ctx.JSON(fiber.Map{"message": "Post liked successfully"})
 }
 
-// Unlike một post
+// Unlike post
 func (h *LikeHandler) UnlikePost(ctx *fiber.Ctx) error {
 	userID, _ := utils.ExtractUserID(ctx)
 

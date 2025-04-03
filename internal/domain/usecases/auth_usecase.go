@@ -167,6 +167,13 @@ func (uc *authUseCase) Login(ctx context.Context, req *entities.LoginRequest) (*
 func (uc *authUseCase) ValidateToken(token string) (uint, error) {
 	return utils.ValidateJWT(token)
 }
+
+func (s *authUseCase) WhoAreYou(ctx context.Context, userId uint) error {
+	// Logic to reset the password using a reset token
+	// For now, return a mock success
+	fmt.Println("WhoAreYou successfully")
+	return nil
+}
 func (uc *authUseCase) RefreshToken(refreshToken string) (*entities.AuthResponse, error) {
 	// Validate the refresh token
 	userID, err := utils.ValidateJWT(refreshToken)

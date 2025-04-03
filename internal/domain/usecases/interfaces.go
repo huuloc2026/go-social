@@ -16,7 +16,10 @@ type UserUseCase interface {
 type AuthUseCase interface {
 	Register(ctx context.Context, req *entities.RegisterRequest) (*entities.AuthResponse, error)
 	Login(ctx context.Context, req *entities.LoginRequest) (*entities.AuthResponse, error)
+
 	ValidateToken(token string) (uint, error)
+	//Who Are You
+	WhoAreYou(ctx context.Context, userId uint) error
 	// Refresh an access token using a refresh token
 	RefreshToken(refreshToken string) (*entities.AuthResponse, error)
 

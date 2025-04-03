@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter()
 
   // Check if user is logged in on initial load
-  useEffectz(() => {
+  useEffect(() => {
     const checkAuth = async () => {
       try {
         const res = await fetch("/api/auth/me")
